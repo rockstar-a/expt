@@ -13,9 +13,6 @@ X = np.array([
 
 # Outputs for logic gates
 gates = {
-    "AND":  [0, 0, 0, 1],
-    "NAND": [1, 1, 1, 0],
-    "OR":   [0, 1, 1, 1],
     "NOR":  [1, 0, 0, 0],
     "XOR":  [0, 1, 1, 0]
 }
@@ -26,7 +23,6 @@ def train_model(Y):
     model = MLPClassifier(
         hidden_layer_sizes=(4,),
         activation='logistic',
-        solver='lbfgs',
         max_iter=2000,
         random_state=42
     )
