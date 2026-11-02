@@ -1,72 +1,47 @@
-# 2. Titanic Survival Prediction - Logistic Regression
+# 2. Titanic
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import make_pipeline
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.compose import make_column_transformer
+import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
 
-# Load dataset
-df = pd.read_csv("train.csv")
+# 1. Load data & identify missing values
+df = pd.read_csv('train.csv')
+print("Missing Values:\n", df.isnull().sum())
 
-# Basic EDA
-print(df.head())
-print(df.describe())
-print("\nMissing Values:\n", df.isnull().sum())
-
-# Distributions
-for col in ['Age', 'Fare', 'Sex', 'Pclass', 'Survived']:
-    sns.histplot(df[col], kde=True) if col in ['Age', 'Fare'] else sns.countplot(x=col, data=df)
-    plt.title(col)
+# 2. Analyze distributions (Age, Sex, Pclass, Fare, Survived)
+for col in ['Age', 'Sex', 'Pclass', 'Fare', 'Survived']:
+    sns.histplot(df[col].dropna(), kde=True)
+    plt.title(f'Distribution of {col}')
     plt.show()
 
-# Survival analysis
-sns.countplot(x='Sex', hue='Survived', data=df)
+# 3. Relationship between Survival and Passenger Characteristics
+sns.barplot(x='Sex', y='Survived', data=df)
+plt.title('Survival by Gender')
 plt.show()
 
-sns.countplot(x='Pclass', hue='Survived', data=df)
+sns.barplot(x='Pclass', y='Survived', data=df)
+plt.title('Survival by Passenger Class')
 plt.show()
 
-sns.boxplot(x='Survived', y='Age', data=df)
+# 4. Outliers & Correlation Heatmap
+sns.boxplot(x=df['Fare'])
+plt.title('Outliers in Fare')
 plt.show()
 
-# Outliers
-sns.boxplot(data=df[['Age', 'Fare']])
+sns.heatmap(df.corr(numeric_only=True), annot=True, cmap='coolwarm')
+plt.title('Correlation Heatmap')
 plt.show()
 
-# Correlation heatmap
-sns.heatmap(df.select_dtypes(include='number').corr(), annot=True, cmap='coolwarm')
-plt.show()
+# 5. Predict Probability of Survival (Sex, Age, Pclass)
+df['Age'] = df['Age'].fillna(df['Age'].median())
+df['Sex'] = df['Sex'].map({'male': 0, 'female': 1})
 
-# Survival prediction using Sex, Age and Pclass
 X = df[['Sex', 'Age', 'Pclass']]
 y = df['Survived']
 
-preprocess = make_column_transformer(
-    (OneHotEncoder(handle_unknown='ignore'), ['Sex']),
-    (SimpleImputer(strategy='median'), ['Age', 'Pclass'])
-)
+model = LogisticRegression()
+model.fit(X, y)
 
-model = make_pipeline(preprocess, LogisticRegression())
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
-
-model.fit(X_train, y_train)
-pred = model.predict(X_test)
-print("Accuracy:", accuracy_score(y_test, pred))
-
-# Predict survival probability
-passenger = pd.DataFrame({
-    'Sex': ['female'],
-    'Age': [25],
-    'Pclass': [1]
-})
-
-probability = model.predict_proba(passenger)[0][1]
-print("Survival Probability:", round(probability * 100, 2), "%")
+# Example: Female (1), Age 25, Class 1
+prob = model.predict_proba([[1, 25, 1]])[0][1]
+print(f"Predicted Survival Probability: {prob:.2f}")
