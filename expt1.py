@@ -1,44 +1,35 @@
-# 1. Temperatures in India - Linear Regression
+# 1. temperature
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 # Load dataset
-df = pd.read_csv("temperatures.csv")
-df.columns = df.columns.str.strip().str.upper()
+df = pd.read_csv('temperatures.csv')
 
-months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']
-Y = df[months].apply(pd.to_numeric, errors='coerce').mean().values
-X = np.arange(1, 13).reshape(-1, 1)
+# Features (Year) and Targets (All 12 Months)
+X = df[['YEAR']]
+y = df.loc[:, 'JAN':'DEC']
 
-# Train model and predict
-model = LinearRegression().fit(X, Y)
-predicted = model.predict(X)
+# I. Train Linear Regression & Predict for inputted year
+model = LinearRegression()
+model.fit(X, y)
 
-# Evaluate model
-print("MSE:", mean_squared_error(Y, predicted))
-print("MAE:", mean_absolute_error(Y, predicted))
-print("R2 Score:", r2_score(Y, predicted))
-print("Equation: Y =", model.intercept_, "+", model.coef_[0], "* X")
+year = int(input("Enter Year to predict: "))
+pred_year = model.predict([[year]])
+print(f"\nPredicted Month-wise Temperatures for {year}:")
+print(pd.Series(pred_year[0], index=y.columns))
 
-# Visualize results
-plt.scatter(X, Y, color='blue', label='Actual')
-plt.plot(X, predicted, color='red', label='Predicted')
-plt.xticks(X.flatten(), months)
-plt.xlabel("Months")
-plt.ylabel("Temperature (°C)")
-plt.title("India's Monthly Temperature - Linear Regression")
+# II. Assess performance using MSE and MAE
+y_pred = model.predict(X)
+print("\nMSE:", mean_squared_error(y, y_pred))
+print("MAE:", mean_absolute_error(y, y_pred))
+
+# III. Visualize Simple Regression Model (for JAN)
+plt.scatter(X, df['JAN'], label='Actual JAN Temp')
+plt.plot(X, y_pred[:, 0], color='red', label='Regression Line')
+plt.xlabel('Year')
+plt.ylabel('Temperature (Celsius)')
+plt.title('Linear Regression: Year vs JAN Temperature')
 plt.legend()
-plt.grid()
 plt.show()
-
-# Compare and save results
-result = pd.DataFrame({
-    'Month': months,
-    'Actual': Y,
-    'Predicted': predicted
-})
-print(result.round(2))
-result.to_csv("temperature_predictions.csv", index=False)
