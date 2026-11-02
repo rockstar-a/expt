@@ -1,50 +1,32 @@
-# 7. Academic performance sheet using pandas and matplotlib.
+# 7. Student Data
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 import seaborn as sns
+import matplotlib.pyplot as plt
 
-# Load dataset and select 30 students
-df = pd.read_csv("StudentPerformanceFactors.csv")
-df = df[['Hours_Studied', 'Attendance', 'Exam_Score']].dropna()
-df = df.sample(30, random_state=42)
-df.columns = ['Study_Hours', 'Attendance', 'Marks']
+# Load first 30 students showing required columns
+df = pd.read_csv('StudentPerformanceFactors.csv').sample(n=30, random_state=100)
+print(df[['Hours_Studied', 'Attendance', 'Exam_Score']].head())
 
-# Academic performance sheet
-df.insert(0, 'Student_ID', range(1, 31))
-print("\nACADEMIC PERFORMANCE SHEET\n", df)
-df.to_csv("Performance_Sheet.csv", index=False)
+# 1. Mean, Median, Variance, Standard Deviation of Exam_Score
+print("Mean    :", df['Exam_Score'].mean())
+print("Median  :", df['Exam_Score'].median())
+print("Variance:", df['Exam_Score'].var())
+print("Std Dev :", df['Exam_Score'].std())
 
-# Statistical analysis
-m = df['Marks']
-print("\nMean:", m.mean())
-print("Median:", m.median())
-print("Variance:", m.var())
-print("Standard Deviation:", m.std())
-print("Correlation:", df['Study_Hours'].corr(m))
+# 2. Correlation between Hours_Studied and Exam_Score
+print("Correlation:", df['Hours_Studied'].corr(df['Exam_Score']))
 
-# Graph 1: Study Hours vs Marks
-sns.regplot(data=df, x='Study_Hours', y='Marks')
-plt.title("Study Hours vs Marks")
+# 3. Scatter Plot
+plt.scatter(df['Hours_Studied'], df['Exam_Score'])
+plt.xlabel('Hours Studied')
+plt.ylabel('Exam Score')
+plt.title('Hours Studied vs Exam Score')
 plt.show()
 
-# Graph 2: Normal Distribution Curve
-sns.histplot(m, kde=True, stat='density')
-plt.title("Normal Distribution of Marks")
+# 4. Histogram with Normal Distribution Curve
+sns.histplot(df['Exam_Score'], kde=True)
+plt.title('Exam Score Distribution with Normal Curve')
 plt.show()
 
-# Graph 3: Box Plot
-sns.boxplot(x=m)
-plt.title("Distribution of Marks")
-plt.show()
-
-# Graph 4: Attendance vs Marks
-sns.scatterplot(data=df, x='Attendance', y='Marks')
-plt.title("Attendance vs Marks")
-plt.show()
-
-# Interpretation
-r = df['Study_Hours'].corr(m)
-print("\nINTERPRETATION:")
-print("Positive correlation" if r > 0 else "Negative correlation" if r < 0 else "No correlation")
-print("Average Marks:", m.mean())
+# 5. Interpretation
+print("Interpretation: Positive correlation shows more study hours lead to higher exam scores. The bell-shaped curve indicates marks are approximately normally distributed.")
