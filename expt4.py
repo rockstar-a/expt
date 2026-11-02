@@ -1,37 +1,44 @@
-# 4. AND, NAND, OR Gates - Neural Network
+# 4+5. Logic Gates
+
 import numpy as np
-import tensorflow as tf
-import matplotlib.pyplot as plt
+from sklearn.neural_network import MLPClassifier
 
-# Input combinations
-X = np.array([[0,0], [0,1], [1,0], [1,1]])
+# Input data
+X = np.array([
+    [0, 0],
+    [0, 1],
+    [1, 0],
+    [1, 1]
+])
 
-# Gate outputs
+# Outputs for logic gates
 gates = {
-    "AND":  np.array([[0],[0],[0],[1]]),
-    "NAND": np.array([[1],[1],[1],[0]]),
-    "OR":   np.array([[0],[1],[1],[1]])
+    "AND":  [0, 0, 0, 1],
+    "NAND": [1, 1, 1, 0],
+    "OR":   [0, 1, 1, 1],
+    "NOR":  [1, 0, 0, 0],
+    "XOR":  [0, 1, 1, 0]
 }
 
+# Create and train neural network
+def train_model(Y):
+
+    model = MLPClassifier(
+        hidden_layer_sizes=(4,),
+        activation='logistic',
+        solver='lbfgs',
+        max_iter=2000,
+        random_state=42
+    )
+
+    model.fit(X, Y)
+    return model
+
+
+# Train and predict all gates
 for name, Y in gates.items():
-    model = tf.keras.Sequential([
-        tf.keras.layers.Input(shape=(2,)),
-        tf.keras.layers.Dense(4, activation='sigmoid'),
-        tf.keras.layers.Dense(1, activation='sigmoid')
-    ])
 
-    model.compile(optimizer='adam', loss='binary_crossentropy',
-                  metrics=['accuracy'])
-    history = model.fit(X, Y, epochs=2000, verbose=0)
+    model = train_model(Y)
 
-    pred = (model.predict(X, verbose=0) > 0.5).astype(int)
-
-    print("\n", name, "Gate")
-    print("Predicted Output:\n", pred)
-    print("Accuracy:", model.evaluate(X, Y, verbose=0)[1])
-
-    plt.plot(history.history['loss'])
-    plt.title(name + " Gate - Training Loss")
-    plt.xlabel("Epochs")
-    plt.ylabel("Loss")
-    plt.show()
+    print("\n", name, "Gate:")
+    print("Predicted Output:", model.predict(X))
