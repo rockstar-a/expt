@@ -1,49 +1,32 @@
-# 8. Real estate price prediction
+# 8. Housing data
 import pandas as pd
-import numpy as np
+import seaborn as sns
 import matplotlib.pyplot as plt
-from scipy.stats import norm, shapiro
 
-# Load dataset (first 50 houses)
-df = pd.read_csv("Housing.csv").head(50)
+# Load first 50 houses showing required columns
+df = pd.read_csv('housing.csv')
+print(df[['price', 'area', 'bedrooms']].head())
 
-# Select required columns
-price = df['price']
-area = df['area']
-bedrooms = df['bedrooms']
+# 1. Mean, Median, Variance, Standard Deviation of price
+print("Mean    :", df['price'].mean())
+print("Median  :", df['price'].median())
+print("Variance:", df['price'].var())
+print("Std Dev :", df['price'].std())
 
-# Statistical analysis
-print("Mean Price:", price.mean())
-print("Median Price:", price.median())
-print("Variance:", price.var())
-print("Standard Deviation:", price.std())
-print("Average Bedrooms:", bedrooms.mean())
+# 2. Correlation between area and price
+print("Correlation:", df['area'].corr(df['price']))
 
-# Correlation
-print("\nArea-Price Correlation:", area.corr(price))
-
-# Scatter plot
-plt.scatter(area, price)
-plt.xlabel("Carpet Area")
-plt.ylabel("House Price")
-plt.title("Area vs House Price")
+# 3. Scatter Plot
+plt.scatter(df['area'], df['price'])
+plt.xlabel('Carpet Area')
+plt.ylabel('Price')
+plt.title('Carpet Area vs Price')
 plt.show()
 
-# Histogram with normal distribution curve
-plt.hist(price, bins=10, density=True, alpha=0.6, edgecolor='black')
-x = np.linspace(price.min(), price.max(), 100)
-plt.plot(x, norm.pdf(x, price.mean(), price.std()), 'r')
-plt.xlabel("House Price")
-plt.ylabel("Density")
-plt.title("House Price Distribution")
+# 4. Histogram with Normal Distribution Curve
+sns.histplot(df['price'], kde=True)
+plt.title('House Price Distribution with Normal Curve')
 plt.show()
 
-# Normality test
-stat, p = shapiro(price)
-print("\nShapiro Test p-value:", p)
-print("Normally Distributed" if p > 0.05 else "Not Normally Distributed")
-
-# Interpretation
-print("\nInterpretation:")
-print("Positive correlation: Larger houses tend to have higher prices."
-      if area.corr(price) > 0 else "No positive relationship between area and price.")
+# 5. Interpretation
+print("Interpretation: Positive correlation confirms larger carpet area leads to higher house prices. The histogram with KDE curve shows whether prices are approximately normally distributed.")
